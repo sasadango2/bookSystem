@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}プロファイル - 図書館システム{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">会員プロファイル</h1>
+        <p class="text-gray-600">会員情報の確認・編集ができます。</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- 会員情報カード -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">👤</span>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">
+                        {{ user.get_full_name|default:user.username }}
+                    </h2>
+                    <p class="text-gray-600">{{ profile.get_membership_type_display }}</p>
+                    <p class="text-sm text-gray-500">会員ID: {{ profile.member_id }}</p>
+                </div>
+
+                <!-- 会員ステータス -->
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">アカウント状態</span>
+                        <span class="{% if profile.is_active %}text-green-600{% else %}text-red-600{% endif %} font-medium">
+                            {% if profile.is_active %}有効{% else %}無効{% endif %}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">入会日</span>
+                        <span class="text-gray-900">{{ profile.join_date|date:"Y年m月d日" }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">貸出上限</span>
+                        <span class="text-gray-900">{{ profile.max_loans }}冊</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">貸出期間</span>
+                        <span class="text-gray-900">{{ profile.loan_period_days }}日</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 利用統計 -->
+            <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">利用統計</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">現在の貸出</span>
+                        <span class="text-gray-900 font-medium">{{ profile.current_loans_count }}冊</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">延滞中</span>
+                        <span class="{% if profile.overdue_loans_count > 0 %}text-red-600{% else %}text-green-600{% endif %} font-medium">
+                            {{ profile.overdue_loans_count }}冊
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">借りられる残り</span>
+                        <span class="text-indigo-600 font-medium">
+                            {% if profile.can_borrow %}
+                                貸出可能
+                            {% else %}
+                                上限に達しています
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- プロファイル編集フォーム -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">プロファイル編集</h3>
+                
+                <form method="POST" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- 基本情報（読み取り専用） -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ユーザー名</label>
+                            <input type="text" value="{{ user.username }}" readonly 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">メールアドレス</label>
+                            <input type="email" value="{{ user.email }}" readonly 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">姓</label>
+                            <input type="text" value="{{ user.first_name }}" readonly 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">名</label>
+                            <input type="text" value="{{ user.last_name }}" readonly 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+                        </div>
+                    </div>
+
+                    <!-- 編集可能な情報 -->
+                    <div>
+                        <label for="{{ form.membership_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            会員種別
+                        </label>
+                        {{ form.membership_type }}
+                        {% if form.membership_type.help_text %}
+                            <p class="mt-1 text-sm text-gray-500">{{ form.membership_type.help_text }}</p>
+                        {% endif %}
+                        {% if form.membership_type.errors %}
+                            <div class="mt-1 text-sm text-red-600">{{ form.membership_type.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- 備考（読み取り専用） -->
+                    {% if profile.notes %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">管理者メモ</label>
+                        <textarea readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">{{ profile.notes }}</textarea>
+                    </div>
+                    {% endif %}
+
+                    <div class="flex justify-end space-x-4">
+                        <a href="{% url 'books:book_list' %}" 
+                           class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            キャンセル
+                        </a>
+                        <button type="submit" 
+                                class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                            更新する
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* フォームフィールドのスタイリング */
+    .form-control {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    select.form-control {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+</style>
+
+<script>
+    // フォームフィールドにBootstrapクラスを追加
+    document.addEventListener('DOMContentLoaded', function() {
+        const formFields = document.querySelectorAll('form input, form select, form textarea');
+        formFields.forEach(field => {
+            if (!field.hasAttribute('readonly')) {
+                field.classList.add('form-control');
+            }
+        });
+    });
+</script>
+{% endblock %}

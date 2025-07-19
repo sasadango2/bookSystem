@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}ログイン - 図書館システム{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="text-center mb-8">
+            <span class="text-4xl mb-4 block">📚</span>
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">ログイン</h1>
+            <p class="text-gray-600">図書館システムにログインしてください</p>
+        </div>
+
+        {% if form.errors %}
+            <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <span class="text-red-400 text-lg">⚠️</span>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">ログインに失敗しました</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            {{ form.non_field_errors }}
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="mb-6">
+                <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    ユーザー名
+                </label>
+                <input type="text" 
+                       name="{{ form.username.name }}" 
+                       value="{{ form.username.value|default:'' }}"
+                       id="{{ form.username.id_for_label }}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                       placeholder="ユーザー名を入力"
+                       required>
+            </div>
+
+            <div class="mb-6">
+                <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    パスワード
+                </label>
+                <input type="password" 
+                       name="{{ form.password.name }}"
+                       id="{{ form.password.id_for_label }}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                       placeholder="パスワードを入力"
+                       required>
+            </div>
+
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center">
+                    <input type="checkbox" id="remember_me" name="remember_me" 
+                           class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label for="remember_me" class="ml-2 block text-sm text-gray-900">
+                        ログイン状態を保持する
+                    </label>
+                </div>
+                <div class="text-sm">
+                    <a href="#" class="text-indigo-600 hover:text-indigo-500">
+                        パスワードを忘れた方
+                    </a>
+                </div>
+            </div>
+
+            <button type="submit" 
+                    class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">
+                ログイン
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+                アカウントをお持ちでない方は
+                <a href="{% url 'members:member_register' %}" class="text-indigo-600 hover:text-indigo-500 font-medium">
+                    こちらから会員登録
+                </a>
+            </p>
+        </div>
+
+        <!-- システム情報 -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <div class="text-center">
+                <h3 class="text-sm font-medium text-gray-900 mb-2">ご利用案内</h3>
+                <div class="text-xs text-gray-500 space-y-1">
+                    <p>📚 書籍の検索・貸出・予約ができます</p>
+                    <p>📅 返却期限の管理・履歴確認が可能です</p>
+                    <p>🔔 重要な通知をお受け取りいただけます</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}貸出中の書籍 - 図書館システム{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">貸出中の書籍</h1>
+        <p class="text-gray-600">現在借りている書籍の一覧です。返却期限にご注意ください。</p>
+    </div>
+
+    {% if loans %}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                書籍情報
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                貸出日
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                返却期限
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                状態
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                アクション
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for loan in loans %}
+                        <tr class="{% if loan.is_overdue %}bg-red-50{% endif %}">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-16 w-12">
+                                        {% if loan.book.image %}
+                                            <img class="h-16 w-12 object-cover rounded" src="{{ loan.book.image.url }}" alt="{{ loan.book.title }}">
+                                        {% else %}
+                                            <div class="h-16 w-12 bg-gray-300 rounded flex items-center justify-center">
+                                                <span class="text-gray-500 text-2xl">📚</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            <a href="{{ loan.book.get_absolute_url }}" class="hover:text-indigo-600">
+                                                {{ loan.book.title }}
+                                            </a>
+                                        </div>
+                                        <div class="text-sm text-gray-500">{{ loan.book.author }}</div>
+                                        <div class="text-xs text-gray-400">{{ loan.book.category.name }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ loan.loan_date|date:"Y年m月d日" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm {% if loan.is_overdue %}text-red-600 font-medium{% else %}text-gray-900{% endif %}">
+                                {{ loan.due_date|date:"Y年m月d日" }}
+                                {% if loan.is_overdue %}
+                                    <br><span class="text-xs">({{ loan.days_overdue }}日延滞)</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if loan.is_overdue %}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                        延滞中
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                        貸出中
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{% url 'loans:return_book' loan.id %}" 
+                                   class="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 transition-colors"
+                                   onclick="return confirm('「{{ loan.book.title }}」を返却しますか？')">
+                                    返却
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 貸出統計 -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl">📚</span>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm text-gray-500">貸出中</div>
+                        <div class="text-xl font-semibold text-gray-900">{{ loans|length }}冊</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl">⏰</span>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm text-gray-500">延滞中</div>
+                        <div class="text-xl font-semibold text-red-600">
+                            {% for loan in loans %}{% if loan.is_overdue %}{{ forloop.counter0|add:1 }}{% endif %}{% empty %}0{% endfor %}冊
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl">📅</span>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm text-gray-500">今週返却期限</div>
+                        <div class="text-xl font-semibold text-yellow-600">
+                            {% now "Y-m-d" as today %}
+                            {% for loan in loans %}
+                                {% if loan.due_date|date:"Y-m-d" <= today|add_days:7 and not loan.is_overdue %}
+                                    {{ forloop.counter0|add:1 }}
+                                {% endif %}
+                            {% empty %}0{% endfor %}冊
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="text-center py-12">
+            <span class="text-6xl text-gray-400 mb-4 block">📚</span>
+            <h2 class="text-xl text-gray-600 mb-2">現在貸出中の書籍はありません</h2>
+            <p class="text-gray-500 mb-6">新しい書籍を借りてみませんか？</p>
+            <a href="{% url 'books:book_list' %}" 
+               class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors">
+                書籍を探す
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

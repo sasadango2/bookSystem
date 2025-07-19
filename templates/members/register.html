@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}会員登録 - 図書館システム{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">会員登録</h1>
+            <p class="text-gray-600">図書館システムの会員登録を行います。すべての項目を正確に入力してください。</p>
+        </div>
+
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- ユーザー登録フォーム -->
+            <div class="border-b border-gray-200 pb-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">アカウント情報</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ user_form.username.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            ユーザー名 <span class="text-red-500">*</span>
+                        </label>
+                        {{ user_form.username }}
+                        {% if user_form.username.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {% for error in user_form.username.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div>
+                        <label for="{{ user_form.password1.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            パスワード <span class="text-red-500">*</span>
+                        </label>
+                        {{ user_form.password1 }}
+                        {% if user_form.password1.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {% for error in user_form.password1.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ user_form.password2.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            パスワード（確認） <span class="text-red-500">*</span>
+                        </label>
+                        {{ user_form.password2 }}
+                        {% if user_form.password2.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {% for error in user_form.password2.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 会員プロファイル情報 -->
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">会員情報</h2>
+                
+                <div>
+                    <label for="{{ profile_form.membership_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        会員種別 <span class="text-red-500">*</span>
+                    </label>
+                    {{ profile_form.membership_type }}
+                    {% if profile_form.membership_type.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">{{ profile_form.membership_type.help_text }}</p>
+                    {% endif %}
+                    {% if profile_form.membership_type.errors %}
+                        <div class="mt-1 text-sm text-red-600">
+                            {% for error in profile_form.membership_type.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 送信ボタン -->
+            <div class="flex justify-between items-center pt-6">
+                <a href="{% url 'login' %}" class="text-indigo-600 hover:text-indigo-500">
+                    既にアカウントをお持ちですか？ログインはこちら
+                </a>
+                <button type="submit" 
+                        class="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 transition-colors">
+                    会員登録
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* フォームフィールドのスタイリング */
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    select.form-control {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+</style>
+
+<script>
+    // フォームフィールドにスタイルクラスを追加
+    document.addEventListener('DOMContentLoaded', function() {
+        const formFields = document.querySelectorAll('form input:not([type="checkbox"]), form select, form textarea');
+        formFields.forEach(field => {
+            field.classList.add('form-control');
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if category %}{{ category.name }} - {% endif %}書籍一覧 - 図書館システム
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">
+            {% if category %}
+                {{ category.name }} の書籍
+            {% else %}
+                すべての書籍
+            {% endif %}
+        </h1>
+
+        <!-- カテゴリ選択 -->
+        <div class="mb-6">
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'books:book_list' %}" 
+                   class="px-4 py-2 rounded-lg {% if not category %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                    すべて
+                </a>
+                {% for cat in categories %}
+                <a href="{{ cat.get_absolute_url }}" 
+                   class="px-4 py-2 rounded-lg {% if category == cat %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                    {{ cat.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 書籍一覧 -->
+    {% if books %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for book in books %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div class="aspect-w-3 aspect-h-4 bg-gray-200">
+                    {% if book.image %}
+                        <img src="{{ book.image.url }}" alt="{{ book.title }}" class="w-full h-48 object-cover">
+                    {% else %}
+                        <div class="w-full h-48 bg-gray-300 flex items-center justify-center">
+                            <span class="text-gray-500 text-6xl">📚</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="p-4">
+                    <h3 class="font-semibold text-lg mb-2 text-gray-900 line-clamp-2">
+                        <a href="{{ book.get_absolute_url }}" class="hover:text-indigo-600">
+                            {{ book.title }}
+                        </a>
+                    </h3>
+                    <p class="text-gray-600 mb-2">著者: {{ book.author }}</p>
+                    <p class="text-gray-500 text-sm mb-3">出版社: {{ book.publisher }}</p>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm {% if book.is_available %}text-green-600{% else %}text-red-600{% endif %}">
+                            {% if book.is_available %}
+                                利用可能 ({{ book.available_copies }}冊)
+                            {% else %}
+                                貸出中
+                            {% endif %}
+                        </span>
+                        <a href="{{ book.get_absolute_url }}" 
+                           class="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700">
+                            詳細
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-12">
+            <span class="text-6xl text-gray-400 mb-4 block">📚</span>
+            <h2 class="text-xl text-gray-600 mb-2">書籍が見つかりません</h2>
+            <p class="text-gray-500">
+                {% if category %}
+                    このカテゴリには書籍がありません。
+                {% else %}
+                    現在、利用可能な書籍がありません。
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

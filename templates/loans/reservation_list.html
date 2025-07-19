@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}予約中の書籍 - 図書館システム{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">予約中の書籍</h1>
+        <p class="text-gray-600">現在予約している書籍の一覧です。利用可能になり次第通知いたします。</p>
+    </div>
+
+    {% if reservations %}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                書籍情報
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                予約日
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                待ち順位
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                状態
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                アクション
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for reservation in reservations %}
+                        <tr>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-16 w-12">
+                                        {% if reservation.book.image %}
+                                            <img class="h-16 w-12 object-cover rounded" src="{{ reservation.book.image.url }}" alt="{{ reservation.book.title }}">
+                                        {% else %}
+                                            <div class="h-16 w-12 bg-gray-300 rounded flex items-center justify-center">
+                                                <span class="text-gray-500 text-2xl">📚</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            <a href="{{ reservation.book.get_absolute_url }}" class="hover:text-indigo-600">
+                                                {{ reservation.book.title }}
+                                            </a>
+                                        </div>
+                                        <div class="text-sm text-gray-500">{{ reservation.book.author }}</div>
+                                        <div class="text-xs text-gray-400">{{ reservation.book.category.name }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ reservation.reservation_date|date:"Y年m月d日" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {% with reservation.book.reservations.filter|first as first_reservation %}
+                                    {% if first_reservation == reservation %}
+                                        <span class="text-green-600 font-medium">1番目</span>
+                                    {% else %}
+                                        {{ forloop.counter }}番目
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if reservation.book.is_available %}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                        利用可能
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        待機中
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                {% if reservation.book.is_available %}
+                                    <a href="{% url 'loans:borrow_book' reservation.book.id %}" 
+                                       class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors">
+                                        借りる
+                                    </a>
+                                {% endif %}
+                                <button onclick="cancelReservation({{ reservation.id }})" 
+                                        class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors">
+                                    キャンセル
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 予約統計 -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl">📋</span>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm text-gray-500">予約中</div>
+                        <div class="text-xl font-semibold text-gray-900">{{ reservations|length }}冊</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl">✅</span>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm text-gray-500">利用可能</div>
+                        <div class="text-xl font-semibold text-green-600">
+                            {% for reservation in reservations %}{% if reservation.book.is_available %}{{ forloop.counter0|add:1 }}{% endif %}{% empty %}0{% endfor %}冊
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="text-center py-12">
+            <span class="text-6xl text-gray-400 mb-4 block">📋</span>
+            <h2 class="text-xl text-gray-600 mb-2">現在予約中の書籍はありません</h2>
+            <p class="text-gray-500 mb-6">貸出中の書籍を予約してみませんか？</p>
+            <a href="{% url 'books:book_list' %}" 
+               class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors">
+                書籍を探す
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function cancelReservation(reservationId) {
+    if (confirm('この予約をキャンセルしますか？')) {
+        // 予約キャンセル処理（Ajax等で実装）
+        alert('予約キャンセル機能は今後実装予定です。');
+    }
+}
+</script>
+{% endblock %}

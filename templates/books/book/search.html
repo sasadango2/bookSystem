@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if query %}「{{ query }}」の検索結果{% else %}書籍検索{% endif %} - 図書館システム
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">書籍検索</h1>
+        
+        <!-- 検索フォーム -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <form method="GET" action="{% url 'books:book_search' %}">
+                <div class="flex">
+                    <input type="text" 
+                           name="q" 
+                           value="{{ query }}" 
+                           placeholder="タイトル、著者、ISBN、内容で検索..."
+                           class="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <button type="submit" 
+                            class="bg-indigo-600 text-white px-8 py-3 rounded-r-lg hover:bg-indigo-700 transition-colors">
+                        🔍 検索
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 検索結果の概要 -->
+        {% if query %}
+        <div class="mb-6">
+            <p class="text-gray-600">
+                「<span class="font-semibold text-gray-900">{{ query }}</span>」の検索結果: 
+                <span class="font-semibold">{{ books|length }}件</span>
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 検索結果 -->
+    {% if books %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for book in books %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div class="aspect-w-3 aspect-h-4 bg-gray-200">
+                    {% if book.image %}
+                        <img src="{{ book.image.url }}" alt="{{ book.title }}" class="w-full h-48 object-cover">
+                    {% else %}
+                        <div class="w-full h-48 bg-gray-300 flex items-center justify-center">
+                            <span class="text-gray-500 text-6xl">📚</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="p-4">
+                    <div class="mb-2">
+                        <span class="inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">
+                            {{ book.category.name }}
+                        </span>
+                    </div>
+                    
+                    <h3 class="font-semibold text-lg mb-2 text-gray-900 line-clamp-2">
+                        <a href="{{ book.get_absolute_url }}" class="hover:text-indigo-600">
+                            {{ book.title }}
+                        </a>
+                    </h3>
+                    <p class="text-gray-600 mb-2">著者: {{ book.author }}</p>
+                    <p class="text-gray-500 text-sm mb-3">出版社: {{ book.publisher }}</p>
+                    
+                    <!-- 検索キーワードのハイライト表示（簡易版） -->
+                    {% if book.description and query in book.description %}
+                    <p class="text-gray-600 text-sm mb-3 line-clamp-2">
+                        {{ book.description|truncatewords:15 }}
+                    </p>
+                    {% endif %}
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm {% if book.is_available %}text-green-600{% else %}text-red-600{% endif %}">
+                            {% if book.is_available %}
+                                利用可能 ({{ book.available_copies }}冊)
+                            {% else %}
+                                貸出中
+                            {% endif %}
+                        </span>
+                        <a href="{{ book.get_absolute_url }}" 
+                           class="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700">
+                            詳細
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% elif query %}
+        <!-- 検索結果が0件の場合 -->
+        <div class="text-center py-12">
+            <span class="text-6xl text-gray-400 mb-4 block">🔍</span>
+            <h2 class="text-xl text-gray-600 mb-2">検索結果が見つかりません</h2>
+            <p class="text-gray-500 mb-6">
+                「{{ query }}」に一致する書籍がありませんでした。<br>
+                別のキーワードで検索してみてください。
+            </p>
+            <div class="space-y-2 text-sm text-gray-600">
+                <p><strong>検索のヒント:</strong></p>
+                <ul class="list-disc list-inside space-y-1">
+                    <li>キーワードを短くしてみてください</li>
+                    <li>漢字・ひらがな・カタカナを変えてみてください</li>
+                    <li>著者名やISBNでも検索できます</li>
+                </ul>
+            </div>
+        </div>
+    {% else %}
+        <!-- 初期表示（検索前） -->
+        <div class="text-center py-12">
+            <span class="text-6xl text-gray-400 mb-4 block">📚</span>
+            <h2 class="text-xl text-gray-600 mb-2">書籍を検索</h2>
+            <p class="text-gray-500">
+                タイトル、著者、ISBN、内容で書籍を検索できます。
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

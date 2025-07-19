@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}貸出履歴 - 図書館システム{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">貸出履歴</h1>
+        <p class="text-gray-600">これまでに借りた書籍の履歴です。</p>
+    </div>
+
+    {% if loans %}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                書籍情報
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                貸出日
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                返却期限
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                返却日
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                状態
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for loan in loans %}
+                        <tr>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-16 w-12">
+                                        {% if loan.book.image %}
+                                            <img class="h-16 w-12 object-cover rounded" src="{{ loan.book.image.url }}" alt="{{ loan.book.title }}">
+                                        {% else %}
+                                            <div class="h-16 w-12 bg-gray-300 rounded flex items-center justify-center">
+                                                <span class="text-gray-500 text-2xl">📚</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            <a href="{{ loan.book.get_absolute_url }}" class="hover:text-indigo-600">
+                                                {{ loan.book.title }}
+                                            </a>
+                                        </div>
+                                        <div class="text-sm text-gray-500">{{ loan.book.author }}</div>
+                                        <div class="text-xs text-gray-400">{{ loan.book.category.name }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ loan.loan_date|date:"Y年m月d日" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ loan.due_date|date:"Y年m月d日" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {% if loan.return_date %}
+                                    {{ loan.return_date|date:"Y年m月d日" }}
+                                {% else %}
+                                    <span class="text-gray-400">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if loan.status == 'returned' %}
+                                    {% if loan.return_date and loan.return_date.date <= loan.due_date %}
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                            返却済み
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            遅延返却
+                                        </span>
+                                    {% endif %}
+                                {% elif loan.is_overdue %}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                        延滞中
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        貸出中
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 履歴統計 -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl">📚</span>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm text-gray-500">総貸出数</div>
+                        <div class="text-xl font-semibold text-gray-900">{{ loans|length }}冊</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl">✅</span>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm text-gray-500">返却済み</div>
+                        <div class="text-xl font-semibold text-green-600">
+                            {% for loan in loans %}{% if loan.status == 'returned' %}{{ forloop.counter0|add:1 }}{% endif %}{% empty %}0{% endfor %}冊
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl">📖</span>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm text-gray-500">貸出中</div>
+                        <div class="text-xl font-semibold text-blue-600">
+                            {% for loan in loans %}{% if loan.status == 'borrowed' %}{{ forloop.counter0|add:1 }}{% endif %}{% empty %}0{% endfor %}冊
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl">⏰</span>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm text-gray-500">延滞経験</div>
+                        <div class="text-xl font-semibold text-red-600">
+                            {% for loan in loans %}{% if loan.is_overdue or loan.return_date and loan.return_date.date > loan.due_date %}{{ forloop.counter0|add:1 }}{% endif %}{% empty %}0{% endfor %}回
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="text-center py-12">
+            <span class="text-6xl text-gray-400 mb-4 block">📚</span>
+            <h2 class="text-xl text-gray-600 mb-2">貸出履歴がありません</h2>
+            <p class="text-gray-500 mb-6">まだ書籍を借りたことがありません。<br>お気に入りの書籍を見つけて借りてみませんか？</p>
+            <a href="{% url 'books:book_list' %}" 
+               class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors">
+                書籍を探す
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
