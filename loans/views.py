@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q
+from datetime import datetime, timedelta
 from books.models import Book
 from .models import Loan, Reservation
 from members.models import MemberProfile
@@ -10,7 +11,28 @@ from members.models import MemberProfile
 @login_required
 def loan_list(request):
     loans = request.user.loans.filter(status='borrowed').order_by('-loan_date')
-    return render(request, 'loans/loan_list.html', {'loans': loans})
+    
+    # 統計情報を計算
+    today = timezone.now().date()
+    week_from_today = today + timedelta(days=7)
+    
+    # 今週返却期限の貸出数を計算
+    upcoming_returns = loans.filter(
+        due_date__lte=week_from_today,
+        due_date__gte=today
+    ).count()
+    
+    # 延滞中の貸出数を計算
+    overdue_count = loans.filter(due_date__lt=today).count()
+    
+    context = {
+        'loans': loans,
+        'upcoming_returns': upcoming_returns,
+        'overdue_count': overdue_count,
+        'today': today,
+    }
+    
+    return render(request, 'loans/loan_list.html', context)
 
 @login_required
 def borrow_book(request, book_id):

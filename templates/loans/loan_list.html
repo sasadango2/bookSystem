@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load loan_filters %}
 
 {% block title %}貸出中の書籍 - 図書館システム{% endblock %}
 
@@ -113,7 +114,7 @@
                     <div class="ml-4">
                         <div class="text-sm text-gray-500">延滞中</div>
                         <div class="text-xl font-semibold text-red-600">
-                            {% for loan in loans %}{% if loan.is_overdue %}{{ forloop.counter0|add:1 }}{% endif %}{% empty %}0{% endfor %}冊
+                            {{ overdue_count }}冊
                         </div>
                     </div>
                 </div>
@@ -127,12 +128,7 @@
                     <div class="ml-4">
                         <div class="text-sm text-gray-500">今週返却期限</div>
                         <div class="text-xl font-semibold text-yellow-600">
-                            {% now "Y-m-d" as today %}
-                            {% for loan in loans %}
-                                {% if loan.due_date|date:"Y-m-d" <= today|add_days:7 and not loan.is_overdue %}
-                                    {{ forloop.counter0|add:1 }}
-                                {% endif %}
-                            {% empty %}0{% endfor %}冊
+                            {{ upcoming_returns }}冊
                         </div>
                     </div>
                 </div>
