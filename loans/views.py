@@ -10,7 +10,8 @@ from members.models import MemberProfile
 
 @login_required
 def loan_list(request):
-    loans = request.user.loans.filter(status='borrowed').order_by('-loan_date')
+    # ユーザーの貸出中書籍を取得
+    loans = Loan.objects.filter(user=request.user, status='borrowed').order_by('-loan_date')
     
     # 統計情報を計算
     today = timezone.now().date()
