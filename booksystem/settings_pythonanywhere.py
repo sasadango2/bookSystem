@@ -27,5 +27,26 @@ DEBUG = False
 ALLOWED_HOSTS = ['sta.pythonanywhere.com', 'www.sta.pythonanywhere.com']
 
 # 静的ファイル設定
+STATIC_URL = '/static/'
 STATIC_ROOT = '/home/sta/bookSystem/staticfiles'
+
+# メディアファイル設定
+MEDIA_URL = '/media/'
 MEDIA_ROOT = '/home/sta/bookSystem/mediafiles'
+
+# 静的ファイルディレクトリを上書き（本番環境では空にする）
+STATICFILES_DIRS = []
+
+# 静的ファイルファインダー
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
+# 本番環境用の追加設定
+USE_TZ = True
+USE_I18N = True
+
+# セキュリティ設定
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True

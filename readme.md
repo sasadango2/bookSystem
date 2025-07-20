@@ -92,6 +92,43 @@ python manage.py migrate --settings=booksystem.settings_pythonanywhere
 python manage.py collectstatic --settings=booksystem.settings_pythonanywhere
 ```
 
+#### 5. PythonAnywhereの静的ファイル設定
+
+PythonAnywhereのWeb appの設定ページで以下を設定：
+
+**Static files:**
+```
+URL: /static/
+Directory: /home/sta/bookSystem/staticfiles
+```
+
+**Media files:**
+```
+URL: /media/
+Directory: /home/sta/bookSystem/mediafiles
+```
+
+#### 6. WSGIファイルの設定（オプション - 静的ファイルが表示されない場合）
+
+PythonAnywhereのWSGI設定ファイルを以下のように設定：
+
+```python
+import os
+import sys
+from django.core.wsgi import get_wsgi_application
+
+# プロジェクトディレクトリをパスに追加
+path = '/home/sta/bookSystem'
+if path not in sys.path:
+    sys.path.append(path)
+
+# Django設定モジュールを指定
+os.environ['DJANGO_SETTINGS_MODULE'] = 'booksystem.settings_pythonanywhere'
+
+# WSGIアプリケーション
+application = get_wsgi_application()
+```
+
 ## MySQL Strict Mode警告の解決
 このプロジェクトは自動的にMySQLのStrict Modeを有効にする設定が含まれているため、MySQL関連の警告は表示されなくなります。
 
