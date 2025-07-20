@@ -42,6 +42,19 @@ class Book(models.Model):
     def is_available(self):
         return self.available and self.available_copies > 0
     
+    def save(self, *args, **kwargs):
+        # available_copiesがtotal_copiesを超えないようにする
+        if self.available_copies > self.total_copies:
+            self.available_copies = self.total_copies
+        
+        # available_copiesが0の場合、availableをFalseに
+        if self.available_copies == 0:
+            self.available = False
+        elif self.available_copies > 0 and not self.available:
+            self.available = True
+            
+        super().save(*args, **kwargs)
+    
         
     
     

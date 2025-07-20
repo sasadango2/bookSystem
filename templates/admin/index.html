@@ -1,0 +1,145 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static admin_urls %}
+
+{% block title %}{% trans 'Site administration' %} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">📚 図書管理システム</a>
+</h1>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <h2>図書管理</h2>
+        <div class="app-books module">
+            {% if app_list %}
+                {% for app in app_list %}
+                    {% if app.app_label == 'books' %}
+                        <div class="module">
+                            <table>
+                                <caption>
+                                    <a href="{{ app.app_url }}" class="section" title="{% blocktrans with name=app.name %}Models in the {{ name }} application{% endblocktrans %}">
+                                        📖 {{ app.name }}
+                                    </a>
+                                </caption>
+                                {% for model in app.models %}
+                                    <tr class="model-{{ model.object_name|lower }}">
+                                        <th scope="row">
+                                            {% if model.admin_url %}
+                                                <a href="{{ model.admin_url }}">{{ model.name }}</a>
+                                            {% else %}
+                                                {{ model.name }}
+                                            {% endif %}
+                                        </th>
+                                        
+                                        {% if model.admin_url %}
+                                            {% if model.add_url %}
+                                                <td><a href="{{ model.add_url }}" class="addlink">{% trans 'Add' %}</a></td>
+                                            {% else %}
+                                                <td>&nbsp;</td>
+                                            {% endif %}
+                                            
+                                            {% if model.admin_url %}
+                                                <td><a href="{{ model.admin_url }}" class="changelink">{% trans 'Change' %}</a></td>
+                                            {% else %}
+                                                <td>&nbsp;</td>
+                                            {% endif %}
+                                        {% else %}
+                                            <td>&nbsp;</td>
+                                            <td>&nbsp;</td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    {% endif %}
+                    
+                    {% if app.app_label == 'auth' %}
+                        <div class="module">
+                            <table>
+                                <caption>
+                                    <a href="{{ app.app_url }}" class="section" title="{% blocktrans with name=app.name %}Models in the {{ name }} application{% endblocktrans %}">
+                                        👥 ユーザー管理
+                                    </a>
+                                </caption>
+                                {% for model in app.models %}
+                                    <tr class="model-{{ model.object_name|lower }}">
+                                        <th scope="row">
+                                            {% if model.admin_url %}
+                                                <a href="{{ model.admin_url }}">{{ model.name }}</a>
+                                            {% else %}
+                                                {{ model.name }}
+                                            {% endif %}
+                                        </th>
+                                        
+                                        {% if model.admin_url %}
+                                            {% if model.add_url %}
+                                                <td><a href="{{ model.add_url }}" class="addlink">{% trans 'Add' %}</a></td>
+                                            {% else %}
+                                                <td>&nbsp;</td>
+                                            {% endif %}
+                                            
+                                            {% if model.admin_url %}
+                                                <td><a href="{{ model.admin_url }}" class="changelink">{% trans 'Change' %}</a></td>
+                                            {% else %}
+                                                <td>&nbsp;</td>
+                                            {% endif %}
+                                        {% else %}
+                                            <td>&nbsp;</td>
+                                            <td>&nbsp;</td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    {% endif %}
+                    
+                    {% if app.app_label == 'members' %}
+                        <div class="module">
+                            <table>
+                                <caption>
+                                    <a href="{{ app.app_url }}" class="section" title="{% blocktrans with name=app.name %}Models in the {{ name }} application{% endblocktrans %}">
+                                        👤 会員管理
+                                    </a>
+                                </caption>
+                                {% for model in app.models %}
+                                    <tr class="model-{{ model.object_name|lower }}">
+                                        <th scope="row">
+                                            {% if model.admin_url %}
+                                                <a href="{{ model.admin_url }}">{{ model.name }}</a>
+                                            {% else %}
+                                                {{ model.name }}
+                                            {% endif %}
+                                        </th>
+                                        
+                                        {% if model.admin_url %}
+                                            {% if model.add_url %}
+                                                <td><a href="{{ model.add_url }}" class="addlink">{% trans 'Add' %}</a></td>
+                                            {% else %}
+                                                <td>&nbsp;</td>
+                                            {% endif %}
+                                            
+                                            {% if model.admin_url %}
+                                                <td><a href="{{ model.admin_url }}" class="changelink">{% trans 'Change' %}</a></td>
+                                            {% else %}
+                                                <td>&nbsp;</td>
+                                            {% endif %}
+                                        {% else %}
+                                            <td>&nbsp;</td>
+                                            <td>&nbsp;</td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p>{% trans "You don't have permission to view or edit anything." %}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
