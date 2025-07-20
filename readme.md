@@ -29,33 +29,67 @@ python manage.py runserver
 
 ## PythonAnywhereでのデプロイ
 
-### 1. MySQLデータベースの作成
+### 方法1: 環境変数を使用する方法
+
+#### 1. MySQLデータベースの作成
 PythonAnywhereのDashboardでMySQLデータベースを作成してください。
 
-### 2. 環境変数の設定
+#### 2. 環境変数の設定
 PythonAnywhereのWeb appの設定ページで以下の環境変数を設定してください：
 
 ```
-MYSQL_DATABASE=yourusername$bookSystem
-MYSQL_USER=yourusername  
-MYSQL_PASSWORD=your_mysql_password
-MYSQL_HOST=yourusername.mysql.pythonanywhere-services.com
+MYSQL_DATABASE=sta$default
+MYSQL_USER=sta  
+MYSQL_PASSWORD=happy2025
+MYSQL_HOST=sta.mysql.pythonanywhere-services.com
 DEBUG=False
 ```
 
-### 3. パッケージのインストール
+#### 3. パッケージのインストール
 ```bash
 pip3.10 install --user -r requirements.txt
 ```
 
-### 4. データベースのマイグレーション
+#### 4. データベースのマイグレーション
 ```bash
 python manage.py migrate
 ```
 
-### 5. 静的ファイルの収集
+### 方法2: 専用設定ファイルを使用する方法（推奨）
+
+#### 1. WSGI設定の変更
+PythonAnywhereのWSGI設定ファイルで以下のように変更：
+
+```python
+import os
+import sys
+
+# プロジェクトディレクトリをパスに追加
+path = '/home/sta/bookSystem'
+if path not in sys.path:
+    sys.path.append(path)
+
+# Django設定モジュールを指定（PythonAnywhere専用設定を使用）
+os.environ['DJANGO_SETTINGS_MODULE'] = 'booksystem.settings_pythonanywhere'
+
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
+```
+
+#### 2. パッケージのインストール
 ```bash
-python manage.py collectstatic
+pip3.10 install --user -r requirements.txt
+```
+
+#### 3. データベースのマイグレーション
+```bash
+cd /home/sta/bookSystem
+python manage.py migrate --settings=booksystem.settings_pythonanywhere
+```
+
+#### 4. 静的ファイルの収集
+```bash
+python manage.py collectstatic --settings=booksystem.settings_pythonanywhere
 ```
 
 ## MySQL Strict Mode警告の解決

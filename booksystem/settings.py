@@ -81,6 +81,7 @@ WSGI_APPLICATION = 'booksystem.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# デフォルト設定（ローカル開発用）
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -88,21 +89,22 @@ DATABASES = {
     }
 }
 
-# PythonAnywhere MySQL設定（本番環境用）
-if 'MYSQL_DATABASE' in os.environ:
+# PythonAnywhere本番環境のMySQL設定
+# 環境変数が設定されている場合、またはPythonAnywhereドメインが検出された場合
+if 'MYSQL_DATABASE' in os.environ or 'PYTHONANYWHERE_DOMAIN' in os.environ or 'sta.pythonanywhere.com' in os.environ.get('HTTP_HOST', ''):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.environ.get('MYSQL_DATABASE'),
-            'USER': os.environ.get('MYSQL_USER'),
-            'PASSWORD': os.environ.get('MYSQL_PASSWORD'),
-            'HOST': os.environ.get('MYSQL_HOST', 'localhost'),
+            'NAME': os.environ.get('MYSQL_DATABASE', 'sta$default'),
+            'USER': os.environ.get('MYSQL_USER', 'sta'),
+            'PASSWORD': os.environ.get('MYSQL_PASSWORD', 'happy2025'),
+            'HOST': os.environ.get('MYSQL_HOST', 'sta.mysql.pythonanywhere-services.com'),
             'PORT': os.environ.get('MYSQL_PORT', '3306'),
             'OPTIONS': {
                 'sql_mode': 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION',
                 'charset': 'utf8mb4',
                 'use_unicode': True,
-                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION'",
             },
         }
     }
