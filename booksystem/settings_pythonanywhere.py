@@ -50,3 +50,8 @@ USE_I18N = True
 # セキュリティ設定
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# ログイン・ログアウト後のリダイレクト設定
+LOGIN_REDIRECT_URL = '/'  # ログイン後はホームページ（書籍一覧）へ
+LOGOUT_REDIRECT_URL = '/'  # ログアウト後もホームページへ
+LOGIN_URL = '/accounts/login/'  # ログインが必要な場合のリダイレクト先

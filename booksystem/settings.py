@@ -155,3 +155,8 @@ STATICFILES_DIRS = [BASE_DIR / "static",]
 MEDIA_URL = 'media/'
 STATIC_ROOT = BASE_DIR/'staticfiles'
 MEDIA_ROOT = BASE_DIR/'mediafiles'
+
+# ログイン・ログアウト後のリダイレクト設定
+LOGIN_REDIRECT_URL = '/'  # ログイン後はホームページ（書籍一覧）へ
+LOGOUT_REDIRECT_URL = '/'  # ログアウト後もホームページへ
+LOGIN_URL = '/accounts/login/'  # ログインが必要な場合のリダイレクト先
